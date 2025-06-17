@@ -436,7 +436,15 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-
+      -- code format keymap:
+      vim.keymap.set('n', '<leader>cf', function()
+        vim.lsp.buf.format()
+      end, { desc = '[C]ode [F]ormat' })
+      vim.keymap.set('n', '<leader>ch', '<cmd>ClangdSwitchSource<CR>', { desc = 'Switch Source/Header (C/C++)' })
+      vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'LSP [C]ode [A]ction' })
+      vim.keymap.set('n', '<leader>r', function()
+        require('ssr').open()
+      end, { desc = 'Find and [R]eplace' })
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -481,7 +489,6 @@ require('lazy').setup({
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       -- Mason must be loaded before its dependents so we need to set it up here.
-      -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
       { 'mason-org/mason.nvim', opts = {} },
       'mason-org/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
@@ -875,29 +882,6 @@ require('lazy').setup({
       signature = { enabled = true },
     },
   },
-
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-    end,
-  },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -984,7 +968,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1011,6 +995,200 @@ require('lazy').setup({
     },
   },
 })
+
+require('catppuccin').setup {
+  flavour = 'mocha', -- latte, frappe, macchiato, mocha
+  color_overrides = {
+    mocha = {
+      text = '#F4CDE9',
+      subtext1 = '#DEBAD4',
+      subtext0 = '#C8A6BE',
+      overlay2 = '#B293A8',
+      overlay1 = '#9C7F92',
+      overlay0 = '#866C7D',
+      surface2 = '#705867',
+      surface1 = '#5A4551',
+      surface0 = '#44313B',
+
+      base = '#352939',
+      mantle = '#211924',
+      crust = '#1a1016',
+    },
+  },
+  background = { -- :h background
+    light = 'latte',
+    dark = 'mocha',
+  },
+  transparent_background = true, -- disables setting the background color.
+  show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
+  term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
+  dim_inactive = {
+    enabled = false, -- dims the background color of inactive window
+    shade = 'dark',
+    percentage = 0.15, -- percentage of the shade to apply to the inactive window
+  },
+  no_italic = false, -- Force no italic
+  no_bold = false, -- Force no bold
+  no_underline = false, -- Force no underline
+  styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
+    comments = { 'italic' }, -- Change the style of comments
+    conditionals = { 'italic' },
+    loops = {},
+    functions = { 'bold' },
+    keywords = {},
+    strings = {},
+    variables = {},
+    numbers = {},
+    booleans = {},
+    properties = {},
+    types = {},
+    operators = {},
+    -- miscs = {}, -- Uncomment to turn off hard-coded styles
+  },
+  custom_highlights = {},
+  default_integrations = true,
+  integrations = {
+    cmp = true,
+    gitsigns = true,
+    nvimtree = true,
+    treesitter = true,
+    notify = false,
+    mini = {
+      enabled = true,
+      indentscope_color = '',
+    },
+    --For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
+  },
+}
+
+-- Default options:
+require('gruvbox').setup {
+  terminal_colors = true, -- add neovim terminal colors
+  undercurl = true,
+  underline = true,
+  bold = true,
+  italic = {
+    strings = true,
+    emphasis = true,
+    comments = true,
+    operators = false,
+    folds = true,
+  },
+  strikethrough = true,
+  invert_selection = false,
+  invert_signs = false,
+  invert_tabline = false,
+  inverse = true, -- invert background for search, diffs, statuslines and errors
+  contrast = '', -- can be "hard", "soft" or empty string
+  palette_overrides = {},
+  overrides = {},
+  dim_inactive = false,
+  transparent_mode = true,
+}
+
+require('lspconfig').clangd.setup {
+  cmd = { '/usr/bin/clangd', '--background-index', '--clang-tidy' },
+}
+
+vim.keymap.set('n', '<leader>c', function()
+  vim.lsp.buf.format()
+end, { desc = '[C]ode' })
+-- setup must be called before loading
+
+vim.opt.termguicolors = true
+vim.o.background = 'dark' -- or "light" for light mode
+vim.cmd [[colorscheme gruvbox]]
+--vim.cmd.colorscheme "gruvbox"
+
+-- require('statusline').setup({
+--   match_colorscheme = true, -- Enable colorscheme inheritance (Default: false)
+--   tabline = false,          -- Enable the tabline (Default: true)
+--   lsp_diagnostics = true,   -- Enable Native LSP diagnostics (Default: true)
+--   ale_diagnostics = false,  -- Enable ALE diagnostics (Default: false)
+-- })
+
+require('dapui').setup()
+-- Set a border for signature help popups
+vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = 'rounded' })
+
+-- Set a border for hover popups
+vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'rounded' })
+require('lualine').setup {
+  options = {
+    icons_enabled = true,
+    theme = 'gruvbox',
+    transparent_mode = true,
+    component_separators = { left = '', right = '' },
+    section_separators = { left = '', right = '' },
+    disabled_filetypes = {
+      statusline = {},
+      winbar = {},
+    },
+    ignore_focus = {},
+    always_divide_middle = true,
+    always_show_tabline = true,
+    globalstatus = false,
+    refresh = {
+      statusline = 1000,
+      tabline = 1000,
+      winbar = 1000,
+      refresh_time = 16, -- ~60fps
+      events = {
+        'WinEnter',
+        'BufEnter',
+        'BufWritePost',
+        'SessionLoadPost',
+        'FileChangedShellPost',
+        'VimResized',
+        'Filetype',
+        'CursorMoved',
+        'CursorMovedI',
+        'ModeChanged',
+      },
+    },
+  },
+  sections = {
+    lualine_a = { {
+      'mode',
+      fmt = function(res)
+        return res:sub(1, 1)
+      end,
+    } },
+    lualine_b = { 'branch', 'diagnostics' },
+    lualine_c = { 'filename' },
+    lualine_x = {},
+    lualine_y = { 'fileformat', 'filetype' },
+    lualine_z = { 'location' },
+  },
+  inactive_sections = {
+    lualine_a = {},
+    lualine_b = {},
+    lualine_c = { 'filename' },
+    lualine_x = { 'location' },
+    lualine_y = {},
+    lualine_z = {},
+  },
+  tabline = {},
+  winbar = {},
+  inactive_winbar = {},
+  extensions = { 'lazy', 'mason', 'fzf' },
+}
+
+require('ssr').setup {
+  border = 'rounded',
+  min_width = 50,
+  min_height = 5,
+  max_width = 120,
+  max_height = 25,
+  adjust_window = true,
+  keymaps = {
+    close = 'q',
+    next_match = 'n',
+    prev_match = 'N',
+    replace_confirm = '<cr>',
+    replace_all = '<leader><cr>',
+  },
+}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
